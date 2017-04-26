@@ -5,8 +5,8 @@ var objectId = require("mongodb").ObjectID;
 
 var app = express();
 var jsonParser = bodyParser.json();
-//var url = process.env.MONGODB_URI;
-var url = "mongodb://sa:123321@ds055875.mlab.com:55875/easyrp";
+var url = process.env.MONGODB_URI;
+//var url = "mongodb://sa:123321@ds055875.mlab.com:55875/easyrp";
 
 app.use(express.static(__dirname + "/public"));
 app.get("/api/voc", function(req, res){
