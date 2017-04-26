@@ -1,0 +1,17 @@
+{
+  "name": "easyRP",
+  "version": "1.0.2",
+  "private": true,
+  "scripts": {
+    "start": "node ws"
+  },
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "express": "^4.14.x",
+    "jade": "*"
+  },
+  "engines": {
+    "node": "6.9.x",
+    "npm": "3.10.x"
+  }
+}
