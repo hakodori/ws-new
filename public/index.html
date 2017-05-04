@@ -23,6 +23,10 @@
             <button type="submit" class="btn btn-sm btn-primary">Добавить</button>
             <a id="reset" class="btn btn-sm btn-primary">Выполнить</a>
         </div>
+        <div id="result-phrase">
+
+        </div>
+
     </form>
     <table class="table table-condensed table-striped table-bordered">
         <thead><tr><th>Id</th>
@@ -41,6 +45,11 @@
           <th>report</th>
           <th>list</th>
           <th>object</th>
+          <th>word0</th>
+          <th>word1</th>
+          <th>word2</th>
+          <th>word3</th>
+          <th>word4</th>
           <th></th></tr></thead>
         <tbody>
         </tbody>
@@ -48,6 +57,19 @@
 
     <script>
         // Получение всех пользователей
+        function ParsePhrase(phrase) {
+            $.ajax({
+                url: "/api/easyrp/" + phrase,
+                type: "GET",
+                contentType: "application/json",
+                success: function (parseResult) {
+                    console.log(parseResult);
+                    document.getElementById('result-phrase').innerHTML = parseResult;
+                 }
+            });
+        }
+
+        // Получение всех эдементов словаря
         function GetVocs() {
             $.ajax({
                 url: "/api/voc",
@@ -144,6 +166,11 @@
                    "<td>" + user.action + "</td>" + "<td>" + user.require_attr + "</td>" +
                    "<td>" + user.report + "</td>" + "<td>" + user.list + "</td>" +
                    "<td>" + user.object + "</td>"+
+                   "<td>" + user.word0 + "</td>"+
+                   "<td>" + user.word1 + "</td>"+
+                   "<td>" + user.word2 + "</td>"+
+                   "<td>" + user.word3 + "</td>"+
+                   "<td>" + user.word4 + "</td>"+
                    "<td><a class='editLink' data-id='" + user._id + "'>Изменить</a> | " +
                     "<a class='removeLink' data-id='" + user._id + "'>Удалить</a></td></tr>";
         }
@@ -151,7 +178,12 @@
         $("#reset").click(function (e) {
 
             e.preventDefault();
-            reset();
+            var form = document.forms["userForm"];
+            var phrase = form.elements["age"].value;
+            //phrase.toString();
+            phrase = phrase.replace(' ', '_');
+            ParsePhrase(phrase);
+            //reset();
         })
 
         // отправка формы
@@ -160,7 +192,7 @@
             var id = this.elements["id"].value;
             var name = this.elements["name"].value;
             var age = this.elements["age"].value;
-            console.log(id);
+            //console.log(id);
             if (id == 0)
                 CreateVoc(name, age);
             else
