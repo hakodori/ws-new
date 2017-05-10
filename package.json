@@ -6,6 +6,7 @@
     "start": "node ws"
   },
   "dependencies": {
+    "async": "^2.4.0",
     "body-parser": "^1.17.1",
     "express": "^4.15.2",
     "jade": "*",

@@ -14,7 +14,7 @@ app.get("/api/easyrp/:ph", function(req, response){
 
     //console.log(req.params.ph);
     str = decodeURI(req.params.ph);
-    //console.log(req.params.ph);
+    // console.log(req.params.ph);
     str = str.toLowerCase();
 
     var result = {"arrParsed" : [], "arrAn" : [],
@@ -30,6 +30,14 @@ function parseString(str, res, response){
 
     splitArr = str.split('_', 50);
 
+    // answer init
+    res.yearS = 0;
+    res.monthS = 0;
+    res.dayS = 0;
+    res.yearPo = 0;
+    res.monthPo = 0;
+    res.dayPo = 0;
+    res.readPastPeriod = false;
     // splitArr.forEach(function(item, i, splitArr) {
     //   //console.log(item);
     //
@@ -47,10 +55,11 @@ function readByPhrase(splitArr, res, response) {
   }
 
   mongoClient.connect(url, function(err, db){
-      db.collection("voc").find({word0 : splitArr[0]}).toArray(function(err, vocs){
-        //db.close();
+      //db.collection("voc").find({word0 : splitArr[0]}).toArray(function(err, vocs){
+      db.collection("voc").find({}).toArray(function(err, vocEntire){
+        db.close();
 
-        if (vocs.length == 0) {
+        if (vocEntire.length == 0) {
           res = {};
           return;
         }
@@ -64,17 +73,25 @@ function readByPhrase(splitArr, res, response) {
       	indPhraseBeg = 0;
       	indExactMatch = 0;
       	wordsTermsQ = 20; // пока оставляем так, потом надо перебрать и взять Object.keys(JSON).length
-      	wordsVocQ = vocs.length;
+      	wordsVocQ = 1000;
       	WordsTermQ = 0;
 
         //console.log(vocs);
 
       	while (indCurr < numbWords) {
 
-      		wordCurr = splitArr[indCurr];
-          // console.log(wordCurr);
+        wordCurr = splitArr[indCurr];
 
       	if (indPhraseVoc == 0) {
+
+              // отбираем массив, гле слово0 равно нашему
+              var vocs = vocEntire.filter(function(itemEntire) {
+                return (itemEntire.word0 == wordCurr);
+              });
+
+              vocs.sort(function(a, b) {
+                return a.word0.localeCompare(b.word0);
+              });
 
       				term = vocs[0];
               // console.log(term);
@@ -106,7 +123,6 @@ function readByPhrase(splitArr, res, response) {
       					}
                 indCurr++;
       				}
-
       	} else {
       			indChanged = false;
       			while ((indCurr < numbWords) && (indPhraseVoc < wordsTermsQ)) {
@@ -180,6 +196,7 @@ function readByPhrase(splitArr, res, response) {
       	  			}
       	 		}
       	 }
+
       }
 
       response.set({'Content-Type': 'text/html; charset=utf-8'});
@@ -228,7 +245,7 @@ function addTerm(term, res) {
 
 function analyzeText(text, res){
     res.wordRecognized = '';
-    if (text == 'за') {
+    if ((text == 'за') || (text == 'в') || (text == 'на')) {
       res.readPeriodPo = false;
       res.readPeriodS = false;
       res.readPeriodZa  = true;
@@ -245,6 +262,7 @@ function analyzeText(text, res){
       res.wordRecognized = text;
     }
 
+
     if ((text == 'прошлый') || (text == 'прошлого') || (text == 'прошлой') || (text == 'прошлую') || (text == 'прошлом')) {
       res.readPastPeriod = true;
       res.wordRecognized = 'прошлый';
@@ -259,45 +277,412 @@ function analyzeText(text, res){
       return;
     }
 
-    if (res.readPeriodZa || res.readPeriodS || res.readPeriodPo) {
-      readPeriod(text, res);
+    currNumb = Number(text);
+    if (isNaN(currNumb)) {
+      currNumb = -1;
+    }
+
+    if (res.readPeriodZa || res.readPeriodS || res.readPeriodPo || (currNumb = -1)) {
+      readPeriod(text, res, currNumb);
+      if (res.periodRead) {
+        res.wordRecognized = 'период';
+      }
     }
 }
 
-function readPeriod(text, res){
+function readPeriod(text, res, currNumb){
 
-    if (text == 'январь' || text == 'января'){
-      res.month = 1;
-    } else if (text == 'февраль' || text == 'февраля'){
-      res.month = 2;
-    } else if (text == 'март' || text == 'марта'){
-      res.month = 3;
-    } else if (text == 'апрель' || text == 'апреля'){
-      res.month = 4;
-    } else if (text == 'май' || text == 'мая'){
-      res.month = 5;
-    } else if (text == 'июнь' || text == 'июня'){
-      res.month = 6;
-    } else if (text == 'июль' || text == 'июля'){
-      res.month = 7;
-    } else if (text == 'август' || text == 'августа'){
-      res.month = 8;
-    } else if (text == 'сентябрь' || text == 'сентября'){
-      res.month = 9;
-    } else if (text == 'октябрь' || text == 'октября'){
-      res.month = 10;
-    } else if (text == 'ноябрь' || text == 'ноября'){
-      res.month = 11;
-    } else if (text == 'декабрь' || text == 'декабря'){
-      res.month = 12;
+    isNotNum = false;
+    res.periodRead = false;
+
+    var currDate = new Date();
+
+    var currYear 		= currDate.getFullYear();
+    var pastYear 		= currYear - 1;
+    var nextYear	= currYear + 1;
+    var currMonth 	= currDate.getMonth() + 1;
+    var tempDate = new Date();
+    tempDate.setMonth(currMonth - 2);
+    var pastMonth 	= tempDate.getMonth() + 1;
+    tempDate = currDate;
+    tempDate.setMonth(currMonth)
+    var nextMonth	= tempDate.getMonth() + 1;
+    var currDay		= currDate.getDate();
+    tempDate = currDate;
+    tempDate.setDate(currDay - 1);
+    var pastDay		= tempDate.getDate();
+    tempDate = currDate;
+    tempDate.setDate(currDay + 1);
+    var nextDay	= tempDate.getDate();
+
+    if (currNumb == -1) {
+      isNotNum = true;
     }
 
+    if (isNotNum) {
+      getMonthNum(res, text);
+      if ((res.month > 0) && (res.month <= 12)) {
+        if ((res.readPeriodZa || res.readPeriodS) && res.readPastPeriod) {
+          res.yearS = currYear - 1;
+        }
+
+        if (!res.readPeriodPo) {
+          res.monthS = res.month;
+        }
+
+        if ((res.readPeriodZa || res.readPeriodPo) && res.readPastPeriod) {
+          res.yearPo = currYear - 1;
+        }
+
+        if (!res.readPeriodS) {
+          res.monthPo = res.month;
+        }
+
+        if (res.readPastPeriod) {
+          res.readPastPeriod = false;
+        }
+
+        res.periodRead = true;
+
+      } else if ((text == 'год') || (text == 'года') || (text == 'году')) {
+
+        if (res.readPeriodZa) {
+
+          if (res.yearS == 0) {
+            res.yearS = currYear - Number(res.readPastPeriod);
+          } else {
+            res.yearS = res.yearS - Number(res.readPastPeriod);
+          }
+
+          if (res.readPastPeriod || (res.monthS == 0)) {
+            res.monthS = 1;
+          }
+
+          if (res.yearPo == 0) {
+            res.yearPo = currYear - Number(res.readPastPeriod);
+          } else {
+            res.yearPo = res.yearPo - Number(res.readPastPeriod);
+          }
+
+          if (res.readPastPeriod || (res.monthPo == 0)) {
+            res.monthPo = 12;
+          }
+
+          if (res.readPastPeriod) {
+            res.readPastPeriod = false;
+          }
+          res.periodRead = true;
+
+        } else if (res.readPeriodS) {
+
+          if (res.yearS == 0) {
+            res.yearS = currYear - Number(res.readPastPeriod);
+          } else {
+            res.yearS = res.yearS - Number(res.readPastPeriod);
+          }
+
+          if (res.readPastPeriod || (res.monthS == 0)) {
+            res.monthS = 1;
+          }
+
+          if (res.readPastPeriod) {
+            res.readPastPeriod = false;
+          }
+          res.periodRead = true;
+
+        } else if (res.readPeriodPo) {
+
+          if (res.yearPo == 0) {
+            res.yearPo = currYear - Number(res.readPastPeriod);
+          } else {
+            res.yearPo = res.yearPo - Number(res.readPastPeriod);
+          }
+
+          if (res.readPastPeriod || (res.monthPo == 0)) {
+            res.monthPo = 12;
+          }
+
+          if (res.readPastPeriod) {
+            res.readPastPeriod = false;
+          }
+          res.periodRead = true;
+
+        }
+      } else if ((text == 'месяц') || (text == 'месяца') || (text == 'месяце')) {
+
+        if (res.readPeriodZa) {
+
+          if (res.yearS == 0) {
+            if (res.readPastPeriod && currMonth == 1) {
+              res.yearS = pastYear;
+            } else {
+              res.yearS = currYear;
+            }
+          }
+
+          if (res.readPastPeriod) {
+            res.monthS = pastMonth;
+          } else {
+            if (res.monthS == 0) {
+              res.monthS = currMonth;
+            }
+          }
+
+          if (res.yearPo == 0) {
+            if (res.readPastPeriod && currMonth == 1) {
+              res.yearPo = pastYear;
+            } else {
+              res.yearPo = currYear;
+            }
+          }
+
+          if (res.readPastPeriod) {
+            res.monthPo = pastMonth;
+          } else {
+            if (res.monthPo == 0) {
+              res.monthPo = currMonth;
+            }
+          }
+
+          if (res.readPastPeriod) {
+            res.readPastPeriod = false;
+          }
+          res.periodRead = true;
+
+        } else if (res.readPeriodS) {
+
+          if (res.yearS == 0) {
+            if (res.readPastPeriod && currMonth == 1) {
+              res.yearS = pastYear;
+            } else {
+              res.yearS = currYear;
+            }
+          }
+
+          if (res.readPastPeriod) {
+            res.monthS = pastMonth;
+          } else {
+            if (res.monthS == 0) {
+              res.monthS = currMonth;
+            }
+          }
+
+          if (res.readPastPeriod) {
+            res.readPastPeriod = false;
+          }
+          res.periodRead = true;
+
+        } else if (res.readPeriodPo) {
+
+          if (res.yearPo == 0) {
+            if (res.readPastPeriod && currMonth == 1) {
+              res.yearPo = pastYear;
+            } else {
+              res.yearPo = currYear;
+            }
+          }
+
+          if (res.readPastPeriod) {
+            res.monthPo = pastMonth;
+          } else {
+            if (res.monthPo == 0) {
+              res.monthPo = currMonth;
+            }
+          }
+
+          if (res.readPastPeriod) {
+            res.readPastPeriod = false;
+          }
+          res.periodRead = true;
+
+        }
+      } else if (text == 'сегодня') {
+
+        if (res.readPeriodZa) {
+
+          res.yearS = currYear;
+          res.yearPo = currYear;
+          res.monthS = currMonth;
+          res.monthPo = currMonth;
+          res.dayS = currDay;
+          res.dayPo = currDay;
+
+          res.periodRead = true;
+
+        } else if (res.readPeriodS) {
+
+          res.yearS = currYear;
+          res.monthS = currMonth;
+          res.dayS = currDay;
+
+          res.periodRead = true;
+
+        } else if (res.readPeriodPo) {
+
+          res.yearPo = currYear;
+          res.monthPo = currMonth;
+          res.dayPo = currDay;
+
+          res.periodRead = true;
+
+        }
+      } else if (text == 'вчера') {
+
+        tempDate = currDate.setDate(currDay - 1);
+        if (res.readPeriodZa) {
+
+          res.yearS = tempDate.getFullYear();
+          res.yearPo = tempDate.getFullYear();
+          res.monthS = tempDate.getMonth() + 1;
+          res.monthPo = tempDate.getMonth() + 1;
+          res.dayS = tempDate.getDate();
+          res.dayPo = tempDate.getDate();
+
+          res.periodRead = true;
+
+        } else if (res.readPeriodS) {
+
+          res.yearS = tempDate.getFullYear();
+          res.monthS = tempDate.getMonth() + 1;
+          res.dayS = tempDate.getDate();
+
+          res.periodRead = true;
+
+        } else if (res.readPeriodPo) {
+
+          res.yearPo = tempDate.getFullYear();
+          res.monthPo = tempDate.getMonth() + 1;
+          res.dayPo = tempDate.getDate();
+
+          res.periodRead = true;
+
+        }
+      } else if (text == 'завтра') {
+
+        tempDate = currDate.setDate(currDay + 1);
+        if (res.readPeriodZa) {
+
+          res.yearS = tempDate.getFullYear();
+          res.yearPo = tempDate.getFullYear();
+          res.monthS = tempDate.getMonth() + 1;
+          res.monthPo = tempDate.getMonth() + 1;
+          res.dayS = tempDate.getDate();
+          res.dayPo = tempDate.getDate();
+
+          res.periodRead = true;
+
+        } else if (res.readPeriodS) {
+
+          res.yearS = tempDate.getFullYear();
+          res.monthS = tempDate.getMonth() + 1;
+          res.dayS = tempDate.getDate();
+
+          res.periodRead = true;
+
+        } else if (res.readPeriodPo) {
+
+          res.yearPo = tempDate.getFullYear();
+          res.monthPo = tempDate.getMonth() + 1;
+          res.dayPo = tempDate.getDate();
+
+          res.periodRead = true;
+
+        }
+      }
+    // is not num
+    } else {
+      if (currNumb > 1900 && currNumb < 2100) {
+
+        if (res.readPeriodS) {
+
+          res.yearS = currNumb;
+          if (res.monthS == 0) {
+            res.monthS = 1;
+          }
+
+        } else if (res.readPeriodPo) {
+
+          res.yearPo = currNumb;
+          if (res.monthPo == 0) {
+            res.monthS = 12;
+          }
+
+        } else {
+
+          res.yearS = currNumb;
+          if (res.monthS == 0) {
+            res.monthS = 1;
+          }
+          res.yearPo = currNumb;
+          if (res.monthPo == 0) {
+            res.monthS = 12;
+          }
+        }
+
+        res.periodRead = true;
+
+      } else if (currNumb > 0 && currNumb <= 31) {
+
+        if (res.readPeriodS) {
+
+          res.dayS = currNumb;
+
+        } else if (res.readPeriodPo) {
+
+          res.dayPo = currNumb;
+
+        } else {
+
+          res.dayS = currNumb;
+          res.dayPo = currNumb;
+
+        }
+
+        res.periodRead = true;
+      }
+    }
+}
+
+function getMonthNum(res, month) {
+
+  if ((month == 'январь') || (month == 'января') || (month == 'январе')){
+    res.month = 1;
+  } else if ((month == 'февраль') || (month == 'февраля') || (month == 'феврале')){
+    res.month = 2;
+  } else if ((month == 'март') || (month == 'марта') || (month == 'марте')){
+    res.month = 3;
+  } else if ((month == 'апрель') || (month == 'апреля') || (month == 'апреле')){
+    res.month = 4;
+  } else if ((month == 'май') || (month == 'мая') || (month == 'мае')){
+    res.month = 5;
+  } else if ((month == 'июнь') || (month == 'июня') || (month == 'июне')){
+    res.month = 6;
+  } else if ((month == 'июль') || (month == 'июля') || (month == 'июле')){
+    res.month = 7;
+  } else if ((month == 'август') || (month == 'августа') || (month == 'августе')){
+    res.month = 8;
+  } else if ((month == 'сентябрь') || (month == 'сентября') || (month == 'сентябре')){
+    res.month = 9;
+  } else if ((month == 'октябрь') || (month == 'октября') || (month == 'октябре')){
+    res.month = 10;
+  } else if ((month == 'ноябрь') || (month == 'ноября') || (month == 'ноябре')){
+    res.month = 11;
+  } else if ((month == 'декабрь') || (month == 'декабря') || (month == 'декабре')){
+    res.month = 12;
+  } else {
+    res.month = 0;
+  }
 }
 
 app.get("/api/voc", function(req, res){
 
     mongoClient.connect(url, function(err, db){
         db.collection("voc").find({}).toArray(function(err, users){
+
+            users.sort(function(a, b) {
+              return a.word0.localeCompare(b.word0);
+            });
+
             res.send(users)
             db.close();
         });
@@ -339,9 +724,9 @@ app.post("/api/voc", jsonParser, function (req, res) {
 
     });
 
-    arr.sort(function(a, b) {
-      return a.phrase.localeCompare(b.phrase);
-    });
+    // arr.sort(function(a, b) {
+    //   return a.word0.localeCompare(b.word0);
+    // });
 
       mongoClient.connect(url, function(err, db){
 

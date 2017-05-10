@@ -63,7 +63,7 @@
                 type: "GET",
                 contentType: "application/json",
                 success: function (parseResult) {
-                    console.log(parseResult);
+                    // console.log(parseResult);
                     document.getElementById('result-phrase').innerHTML = parseResult;
                  }
             });
@@ -181,7 +181,7 @@
             var form = document.forms["userForm"];
             var phrase = form.elements["age"].value;
             //phrase.toString();
-            phrase = phrase.replace(' ', '_');
+            phrase = phrase.replace(/\ /g, '_');
             ParsePhrase(phrase);
             //reset();
         })
