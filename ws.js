@@ -38,6 +38,12 @@ function parseString(str, res, response){
     res.monthPo = 0;
     res.dayPo = 0;
     res.readPastPeriod = false;
+    res.typeReport = 0;
+    res.typeList = 0;
+    res.typeObj = 0;
+    res.obj = '';
+    res.arrArea = [];
+    res.defs = [];
     // splitArr.forEach(function(item, i, splitArr) {
     //   //console.log(item);
     //
@@ -57,7 +63,7 @@ function readByPhrase(splitArr, res, response) {
   mongoClient.connect(url, function(err, db){
       //db.collection("voc").find({word0 : splitArr[0]}).toArray(function(err, vocs){
       db.collection("voc").find({}).toArray(function(err, vocEntire){
-        db.close();
+        //db.close();
 
         if (vocEntire.length == 0) {
           res = {};
@@ -199,18 +205,93 @@ function readByPhrase(splitArr, res, response) {
 
       }
 
-      response.set({'Content-Type': 'text/html; charset=utf-8'});
-      response.send(JSON.stringify(res));
+      db.collection("def").find({}).toArray(function(err, defsEntire){
 
+            //console.log(defsEntire);
+
+            //возвращаем вид объекта
+            currType = '';
+            if (res.typeReport > res.typeObj && res.typeReport > res.typeList) {
+          		currType = "отчет";
+          	} else if (res.typeObj > res.typeList && res.typeObj > res.typeReport) {
+          		currType = "объект";
+          	} else if (res.typeList > res.typeObj && res.typeList > res.typeReport) {
+          		currType = "список";
+          	} else {
+          		currType = "неопределено";
+          	}
+
+            currArea = returnArea(res);
+
+            if (res.obj == '' && currArea != '' && currType != '') {		//попробуем определить объект по таблице соответствий
+          		returnObjByAttribute(res, currType, currArea, defsEntire);
+          	}
+
+            var defsFilter = defsEntire.filter(function(itemEntire) {
+              return (itemEntire.obj == res.obj && itemEntire.objType == currType);
+              //return (res.obj.localeCompare(itemEntire.obj) && currType.localeCompare(itemEntire.objType));
+            });
+
+            res.defs = defsFilter;
+
+            response.set({'Content-Type': 'text/html; charset=utf-8'});
+            response.send(JSON.stringify(res));
+
+      });
   //         res.send(users)
     });
   });
   //
 }
 
+function returnObjByAttribute(res, currType, currArea, defsEntire) {
+
+  var defsFilter = defsEntire.filter(function(itemEntire) {
+    return (itemEntire.area == currArea && itemEntire.objType == currType);
+  });
+
+  defsFilter.forEach(function(item, i, defsFilter) {
+    //console.log(item);
+    if (item.result != null && item.result != undefined && item.result != '' && item.result != 0) {
+        return item.result
+    }
+  });
+}
+
+function returnArea(res) {
+
+    if (res.arrArea.length == 0) {
+      return '';
+    }
+
+    res.arrArea.sort(function(a, b) {
+      return b.rate - a.rate;
+    });
+
+    if (res.arrArea.length > 1) {
+      if (res.arrArea[0].rate == res.arrArea[1].rate) {
+          return '';
+      } else {
+        return res.arrArea.area;
+      }
+    } else {
+      return res.arrArea.area;
+    }
+
+}
+
 function addTerm(term, res) {
 
     res.arrParsed.push(term.ethalon);
+
+    res.typeReport = res.typeReport + Number(term.report);
+    res.typeList = res.typeList + Number(term.list);
+    res.typeObj = res.typeObj + Number(term.object);
+
+    //if ((term.obj_type != null && term.obj_type != undefined && term.obj_type != '' && term.obj_type != 0) && (res.obj == '')) {
+    if ((term.obj_type != null && term.obj_type != undefined && term.obj_type != '' && term.obj_type != 0) && (res.obj == '')) {
+      res.obj = term.ethalon;
+    }
 
     // console.log(term.object);
     // console.log(term.area);
@@ -733,6 +814,45 @@ app.post("/api/voc", jsonParser, function (req, res) {
           db.collection("voc").remove({});
 
           db.collection("voc").insertMany(arr, function(err, result){
+
+              if(err) return res.status(400).send();
+
+              //res.send(user);
+              db.close();
+           });
+       });
+});
+
+app.post("/api/def", jsonParser, function (req, res) {
+
+    //console.log(req.body);
+
+    if(!req.body) return res.sendStatus(400);
+
+    arr = req.body;
+    // arr.forEach(function(item, i, arr) {
+    //
+    //   phrase = item.phrase;
+    //   splitArr = phrase.split(' ', 50);
+    //
+    //   splitArr.forEach(function(itemw, iw, splitArr) {
+    //     //console.log(item);
+    //     item['word' + iw] = itemw;
+    //   });
+    //
+    //   //console.log(item);
+    //
+    // });
+
+    // arr.sort(function(a, b) {
+    //   return a.word0.localeCompare(b.word0);
+    // });
+
+      mongoClient.connect(url, function(err, db){
+
+          db.collection("def").remove({});
+
+          db.collection("def").insertMany(arr, function(err, result){
 
               if(err) return res.status(400).send();
 

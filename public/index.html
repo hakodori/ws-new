@@ -16,6 +16,10 @@
             <input class="form-control" name="name" />
         </div>
         <div class="form-group">
+            <label for="defs">Определения:</label>
+            <input class="form-control" name="defs" />
+        </div>
+        <div class="form-group">
             <label for="age">Фраза:</label>
             <input class="form-control" name="age" />
         </div>
@@ -99,7 +103,7 @@
                 }
             });
         }
-        // Добавление пользователя
+        // Добавление словаря
         function CreateVoc(userName, userAge) {
             $.ajax({
                 url: "api/voc",
@@ -116,6 +120,23 @@
                 }
             })
         }
+        function CreateDefs(defs) {
+            $.ajax({
+                url: "api/def",
+                contentType: "application/json",
+                method: "POST",
+                // data: JSON.stringify([{
+                //     name: userName,
+                //     age: userAge
+                // }]),
+                data: "[" + defs + "]",
+                success: function (user) {
+                    reset();
+                    //$("table tbody").append(row(user));
+                }
+            })
+        }
+
         // Изменение пользователя
         function EditVoc(userId, userName, userAge) {
             $.ajax({
@@ -141,6 +162,7 @@
             var form = document.forms["userForm"];
             form.reset();
             form.elements["id"].value = 0;
+            form.elements["defs"].value = '';
         }
 
         // Удаление пользователя
@@ -191,12 +213,18 @@
             e.preventDefault();
             var id = this.elements["id"].value;
             var name = this.elements["name"].value;
+            var defs = this.elements["defs"].value;
             var age = this.elements["age"].value;
-            //console.log(id);
-            if (id == 0)
-                CreateVoc(name, age);
-            else
+            console.log(name);
+            if (id == 0) {
+                if (name == '') {
+                  CreateDefs(defs);
+                } else {
+                  CreateVoc(name, age);
+                }
+            } else {
                 EditVoc(id, name, age);
+            }
         });
 
         // нажимаем на ссылку Изменить
