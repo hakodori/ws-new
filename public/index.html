@@ -20,6 +20,10 @@
             <input class="form-control" name="defs" />
         </div>
         <div class="form-group">
+            <label for="sets">Настройки:</label>
+            <input class="form-control" name="sets" />
+        </div>
+        <div class="form-group">
             <label for="age">Фраза:</label>
             <input class="form-control" name="age" />
         </div>
@@ -63,7 +67,7 @@
         // Получение всех пользователей
         function ParsePhrase(phrase) {
             $.ajax({
-                url: "/api/easyrp/" + phrase,
+                url: "/api/easyrp/solution/developer/version/easyRP_ID/" + phrase,
                 type: "GET",
                 contentType: "application/json",
                 success: function (parseResult) {
@@ -130,6 +134,22 @@
                 //     age: userAge
                 // }]),
                 data: "[" + defs + "]",
+                success: function (user) {
+                    reset();
+                    //$("table tbody").append(row(user));
+                }
+            })
+        }
+        function CreateSets(sets) {
+            $.ajax({
+                url: "api/set",
+                contentType: "application/json",
+                method: "POST",
+                // data: JSON.stringify([{
+                //     name: userName,
+                //     age: userAge
+                // }]),
+                data: "[" + sets + "]",
                 success: function (user) {
                     reset();
                     //$("table tbody").append(row(user));
@@ -214,14 +234,22 @@
             var id = this.elements["id"].value;
             var name = this.elements["name"].value;
             var defs = this.elements["defs"].value;
+            var sets = this.elements["sets"].value;
             var age = this.elements["age"].value;
             console.log(name);
             if (id == 0) {
-                if (name == '') {
-                  CreateDefs(defs);
-                } else {
+                if (name != '') {
                   CreateVoc(name, age);
                 }
+
+                if (defs != '') {
+                  CreateDefs(defs);
+                }
+
+                if (sets != '') {
+                  CreateSets(sets);
+                }
+
             } else {
                 EditVoc(id, name, age);
             }

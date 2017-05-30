@@ -10,9 +10,9 @@ var url = "mongodb://sa:123321@ds055875.mlab.com:55875/easyrp";
 
 app.use(express.static(__dirname + "/public"));
 
-app.get("/api/easyrp/:ph", function(req, response){
+app.get("/api/easyrp/:solution/:developer/:version/:easyRP_ID/:ph", function(req, response){
 
-    //console.log(req.params.ph);
+    //console.log(req.params);
     str = decodeURI(req.params.ph);
     // console.log(req.params.ph);
     str = str.toLowerCase();
@@ -853,6 +853,45 @@ app.post("/api/def", jsonParser, function (req, res) {
           db.collection("def").remove({});
 
           db.collection("def").insertMany(arr, function(err, result){
+
+              if(err) return res.status(400).send();
+
+              //res.send(user);
+              db.close();
+           });
+       });
+});
+
+app.post("/api/set", jsonParser, function (req, res) {
+
+    //console.log(req.body);
+
+    if(!req.body) return res.sendStatus(400);
+
+    arr = req.body;
+    // arr.forEach(function(item, i, arr) {
+    //
+    //   phrase = item.phrase;
+    //   splitArr = phrase.split(' ', 50);
+    //
+    //   splitArr.forEach(function(itemw, iw, splitArr) {
+    //     //console.log(item);
+    //     item['word' + iw] = itemw;
+    //   });
+    //
+    //   //console.log(item);
+    //
+    // });
+
+    // arr.sort(function(a, b) {
+    //   return a.word0.localeCompare(b.word0);
+    // });
+
+      mongoClient.connect(url, function(err, db){
+
+          db.collection("set").remove({});
+
+          db.collection("set").insertMany(arr, function(err, result){
 
               if(err) return res.status(400).send();
 
