@@ -14,21 +14,27 @@ app.get("/api/easyrp/:solution/:developer/:version/:easyRP_ID/:ph", function(req
 
     //console.log(req.params);
     str = decodeURI(req.params.ph);
+
+    var reqParams = {};
+    reqParams.solution = decodeURI(req.params.solution);
+    reqParams.developer = decodeURI(req.params.developer);
+    reqParams.version = decodeURI(req.params.version);
+    reqParams.easyRP_ID = decodeURI(req.params.easyRP_ID);
     // console.log(req.params.ph);
     str = str.toLowerCase();
 
     var result = {"arrParsed" : [], "arrAn" : [],
-          "arrArea" : [], "arrIndex" : []};
-    parseString(str, result, response);
+          "arrArea" : [], "arrIndex" : [], "arrNotParsed" : []};
+    parseString(str, result, response, reqParams);
 
     // response.set({'Content-Type': 'text/html; charset=utf-8'});
     // response.send(JSON.stringify(result));
 
 });
 
-function parseString(str, res, response){
+function parseString(str, res, response, reqParams){
 
-    splitArr = str.split('_', 50);
+    splitArr = str.split(' ', 50);
 
     // answer init
     res.yearS = 0;
@@ -44,16 +50,26 @@ function parseString(str, res, response){
     res.obj = '';
     res.arrArea = [];
     res.defs = [];
+    res.sets = [];
+    res.readObjNum = false;
+    res.objNum = 0;
+    res.objWeight = 0;
+    res.phPlan = 0;
+    res.phFact = 0;
+    res.phPlanFact = undefined;
+    res.sortType = '';
+    res.filterOwn = false;
+
     // splitArr.forEach(function(item, i, splitArr) {
     //   //console.log(item);
     //
     // });
 
-    readByPhrase(splitArr, res, response);
+    readByPhrase(splitArr, res, response, reqParams);
 
 }
 
-function readByPhrase(splitArr, res, response) {
+function readByPhrase(splitArr, res, response, reqParams) {
 
   if (splitArr.length == 0) {
     res = {};
@@ -90,45 +106,59 @@ function readByPhrase(splitArr, res, response) {
 
       	if (indPhraseVoc == 0) {
 
-              // отбираем массив, гле слово0 равно нашему
-              var vocs = vocEntire.filter(function(itemEntire) {
-                return (itemEntire.word0 == wordCurr);
-              });
+              if (wordCurr.substr(0, 7) == '[param~') {
+                var vocsParam = vocEntire.filter(function(itemEntire) {
+                  return (itemEntire.phrase == wordCurr);
+                });
+                if (vocsParam.length > 0) {
+                  addTerm(vocsParam[0], res, vocEntire);
+                }
 
-              vocs.sort(function(a, b) {
-                return a.word0.localeCompare(b.word0);
-              });
-
-      				term = vocs[0];
-              // console.log(term);
-      				if (term != undefined) {
-        					strFound = wordCurr;
-        					indPhraseVoc = 1;
-        					indVoc = 0;
-        					indVocFound = indVoc;
-
-                  if (term.word1 == undefined) {             		//в словаре есть термин совпадающий с ТекСловом
-        						indExactMatch = indVoc;
-
-        					} else {
-        						indExactMatch = -1;                //в словаре пока не нашли совпадающий термин
-        					}
-        					indPhraseBeg = indCurr;
-        					WordsTermQ = 1;
-        					indCurr++;
-                  if (indCurr == numbWords) {
-                    addTerm(term, res);
-        					}
-      				} else {
-      					analyzeText(wordCurr, res);
-
-      					if (res.wordRecognized != '') {
-                  res.arrParsed.push(res.wordRecognized);
-      					} else {
-      						res.arrParsed.push(wordCurr);
-      					}
                 indCurr++;
-      				}
+              } else {
+                // отбираем массив, гле слово0 равно нашему
+                var vocs = vocEntire.filter(function(itemEntire) {
+                  return (itemEntire.word0 == wordCurr);
+                });
+
+                vocs.sort(function(a, b) {
+                  return a.word0.localeCompare(b.word0);
+                });
+
+        				term = vocs[0];
+                // console.log(term);
+        				if (term != undefined) {
+          					strFound = wordCurr;
+          					indPhraseVoc = 1;
+          					indVoc = 0;
+          					indVocFound = indVoc;
+
+                    if (term.word1 == undefined) {             		//в словаре есть термин совпадающий с ТекСловом
+          						indExactMatch = indVoc;
+
+          					} else {
+          						indExactMatch = -1;                //в словаре пока не нашли совпадающий термин
+          					}
+          					indPhraseBeg = indCurr;
+          					WordsTermQ = 1;
+          					indCurr++;
+                    if (indCurr == numbWords) {
+                      addTerm(term, res, vocEntire);
+          					}
+        				} else {
+        					analyzeText(wordCurr, res);
+
+        					if (res.wordRecognized != '') {
+                    res.arrParsed.push(res.wordRecognized);
+        					} else {
+        						res.arrParsed.push(wordCurr);
+                    if (currWord.length > 2) {
+                      res.arrNotParsed.push(wordCurr);
+                    }
+        					}
+                  indCurr++;
+        				}
+              }
       	} else {
       			indChanged = false;
       			while ((indCurr < numbWords) && (indPhraseVoc < wordsTermsQ)) {
@@ -153,12 +183,15 @@ function readByPhrase(splitArr, res, response) {
       					indChanged = true;
       					if (indVoc == wordsVocQ) {    //дошли до последнего слова словаря
       						if (indExactMatch >= 0) {
-                    addTerm(vocs[indExactMatch], res);
+                    addTerm(vocs[indExactMatch], res, vocEntire);
       							strFound = "";
       							indPhraseVoc = 0;
       							//ТекИндекс = ТекИндекс + 1;
       						} else {
                     res.arrParsed.push(splitArr[indPhraseBeg]);
+                    if (splitArr[indPhraseBeg].length > 2) {
+                      res.arrNotParsed.push(splitArr[indPhraseBeg]);
+                    }
       							indPhraseVoc = 0;
       							indCurr = indPhraseBeg + 1;
       						}
@@ -172,7 +205,7 @@ function readByPhrase(splitArr, res, response) {
       					indCurr++;
       					if ((indPhraseVoc == wordsTermsQ)  	//дошли до конца термина (достигли максимальной длины терминов)
       							|| (indCurr = numbWords)) {		//дошли до конца фразы
-      						addTerm(vocs[indVoc], res);
+      						addTerm(vocs[indVoc], res, vocEntire);
       						strFound = '';
       						indPhraseVoc = 0;
       						break;
@@ -183,7 +216,7 @@ function readByPhrase(splitArr, res, response) {
       					}
       	 			} else {
                 if (indExactMatch >= 0) {
-                  addTerm(vocs[indExactMatch], res);
+                  addTerm(vocs[indExactMatch], res, vocEntire);
       						strFound = '';
       						indPhraseVoc = 0;
       						indCurr = indPhraseBeg + WordsTermQ;
@@ -194,6 +227,9 @@ function readByPhrase(splitArr, res, response) {
                     res.arrParsed.push(res.wordRecognized);
         					} else {
         						res.arrParsed.push(splitArr[indPhraseBeg]);
+                    if (splitArr[indPhraseBeg].length > 2) {
+                      res.arrNotParsed.push(splitArr[indPhraseBeg]);
+                    }
                   }
       						indPhraseVoc = 0;
       						indCurr = indPhraseBeg + 1;
@@ -218,8 +254,16 @@ function readByPhrase(splitArr, res, response) {
           	} else if (res.typeList > res.typeObj && res.typeList > res.typeReport) {
           		currType = "список";
           	} else {
-          		currType = "неопределено";
+          		currType = undefined;
           	}
+
+            if (res.phPlan > res.phFact) {
+              res.phPlanFact = 'plan';
+            } else if (res.phPlan < res.phFact) {
+              res.phPlanFact = 'fact';
+            } else {
+              res.phPlanFact = undefined;
+            }
 
             currArea = returnArea(res);
 
@@ -228,15 +272,40 @@ function readByPhrase(splitArr, res, response) {
           	}
 
             var defsFilter = defsEntire.filter(function(itemEntire) {
-              return (itemEntire.obj == res.obj && itemEntire.objType == currType);
+              return ((itemEntire.obj == res.obj)
+                && (itemEntire.objType == currType || itemEntire.objType == 'any')
+                && (itemEntire.pf == res.phPlanFact || itemEntire.pf == 'any')
+                && (itemEntire.area == currArea || itemEntire.objType == 'any')
+                && (itemEntire.solution == reqParams.solution || isEmpty(itemEntire.solution))
+                && (itemEntire.developer == reqParams.developer || isEmpty(itemEntire.developer))
+                && (itemEntire.version == reqParams.version || isEmpty(itemEntire.version))
+                && (itemEntire.easyRP_ID == reqParams.easyRP_ID || isEmpty(itemEntire.easyRP_ID))
+              );
               //return (res.obj.localeCompare(itemEntire.obj) && currType.localeCompare(itemEntire.objType));
             });
 
-            res.defs = defsFilter;
+            if (defsFilter.length > 0) {
+              res.defs = defsFilter[0];
+            }
 
-            response.set({'Content-Type': 'text/html; charset=utf-8'});
-            response.send(JSON.stringify(res));
+            db.collection("set").find({}).toArray(function(err, setsEntire){
 
+              var setsFilter = setsEntire.filter(function(itemEntire) {
+                return ((itemEntire.obj == res.obj)
+                  && (itemEntire.solution == reqParams.solution || isEmpty(itemEntire.solution))
+                  && (itemEntire.developer == reqParams.developer || isEmpty(itemEntire.developer))
+                  && (itemEntire.version == reqParams.version || isEmpty(itemEntire.version))
+                  && (itemEntire.easyRP_ID == reqParams.easyRP_ID || isEmpty(itemEntire.easyRP_ID))
+                );
+              });
+
+              if (setsEntire.length > 0) {
+                res.sets = setsFilter[0];
+              }
+
+              response.set({'Content-Type': 'text/html; charset=utf-8'});
+              response.send(JSON.stringify(res));
+            });
       });
   //         res.send(users)
     });
@@ -258,10 +327,18 @@ function returnObjByAttribute(res, currType, currArea, defsEntire) {
   });
 }
 
+function isEmpty(element) {
+  if (element != null && element != undefined && element != '' && element != 0) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 function returnArea(res) {
 
     if (res.arrArea.length == 0) {
-      return '';
+      return undefined;
     }
 
     res.arrArea.sort(function(a, b) {
@@ -270,7 +347,7 @@ function returnArea(res) {
 
     if (res.arrArea.length > 1) {
       if (res.arrArea[0].rate == res.arrArea[1].rate) {
-          return '';
+          return undefined;
       } else {
         return res.arrArea.area;
       }
@@ -280,18 +357,42 @@ function returnArea(res) {
 
 }
 
-function addTerm(term, res) {
+function addTerm(term, res, vocEntire) {
 
-    res.arrParsed.push(term.ethalon);
+    currEthalon = term.ethalon;
+
+    while (currEthalon.substr(0, 6) == '[term~') {
+        indexEndTerm = currEthalon.indexOf(']');
+        currTerm = currEthalon.substr(6, indexEndTerm - 6);
+
+        var vocCurrTerm = vocEntire.filter(function(itemEntire) {
+          return (itemEntire.phrase == currTerm);
+        });
+
+        if (vocCurrTerm.length > 0) {
+          addTerm(vocCurrTerm[0], res, vocEntire);
+        }
+
+        currEthalon = currEthalon.substr(indexEndTerm + 1);
+    }
+
+    res.readPeriodPo = false;
+    res.readPeriodS = false;
+    res.readPeriodZa  = false;
 
     res.typeReport = res.typeReport + Number(term.report);
     res.typeList = res.typeList + Number(term.list);
     res.typeObj = res.typeObj + Number(term.object);
 
     //if ((term.obj_type != null && term.obj_type != undefined && term.obj_type != '' && term.obj_type != 0) && (res.obj == '')) {
-    if ((term.obj_type != null && term.obj_type != undefined && term.obj_type != '' && term.obj_type != 0) && (res.obj == '')) {
-      res.obj = term.ethalon;
+    // if ((term.obj_type != null && term.obj_type != undefined && term.obj_type != '' && term.obj_type != 0) && (res.obj == '')) {
+    //   res.obj = term.ethalon;
+    // }
+    if (currEthalon == '') {
+      return undefined;
     }
+
+    res.arrParsed.push(term.ethalon);
 
     // console.log(term.object);
     // console.log(term.area);
@@ -299,7 +400,16 @@ function addTerm(term, res) {
     // console.log(term.index);
 
     if ((term.object != null) && (term.object != undefined) && (term.object != '')) {
-        res.arrIndex.push(term.index);
+        if (res.obj == '') {
+          res.obj = currEthalon;
+          res.objWeight = term.object * 1.1;
+        } else if (res.obj == 'продажи' && currEthalon == 'вп') {
+          res.obj = 'вд';
+        } else if (term.object > res.objWeight) {
+          res.obj = currEthalon;
+          res.objWeight = term.object;
+        }
+        //res.arrIndex.push(term.index);
     }
 
     if ((term.area != null) && (term.area != undefined) && (term.area != '')) {
@@ -311,16 +421,30 @@ function addTerm(term, res) {
 
     if ((term.analitics != null) && (term.analitics != undefined) && (term.analitics != ''))  {
         res.arrAn.push(term.analitics);
-        res.analytics = res.analytics + term.ethalon + " ";
+        res.analytics = res.analytics + term.ethalon + ' ';
     }
 
     if ((term.index != null) && (term.index != undefined) && (term.index != ''))  {
         res.arrIndex.push(term.index);
     }
 
-    res.readPeriodPo = false;
-    res.readPeriodS = false;
-    res.readPeriodZa  = false;
+    if ((term.sort != null) && (term.sort != undefined) && (term.sort != ''))  {
+        if (term.sort == 'убывание') {
+          res.sortType = 'DESC';
+        } else {
+          res.sortType = 'ASC';
+        }
+    }
+
+    if ((term.filter != null) && (term.filter != undefined) && (term.filter != '') && (currEthalon = 'собственный'))  {
+      res.filterOwn = true;
+    }
+
+    if (term.ethelon == 'план') {
+      res.phPlan++;
+    } else if (term.ethelon == 'факт') {
+      res.phFact++;
+    }
 
 }
 
@@ -341,17 +465,15 @@ function analyzeText(text, res){
       res.readPeriodS = false;
       res.readPeriodZa  = false;
       res.wordRecognized = text;
-    }
-
-
-    if ((text == 'прошлый') || (text == 'прошлого') || (text == 'прошлой') || (text == 'прошлую') || (text == 'прошлом')) {
+    } else if ((text == 'прошлый') || (text == 'прошлого') || (text == 'прошлой') || (text == 'прошлую') || (text == 'прошлом')) {
       res.readPastPeriod = true;
       res.wordRecognized = 'прошлый';
-    }
-
-    if ((text == 'следующий') || (text == 'следующего') || (text == 'следующем') || (text == 'следующей') || (text == 'следующую')) {
+    } else if ((text == 'следующий') || (text == 'следующего') || (text == 'следующем') || (text == 'следующей') || (text == 'следующую')) {
       res.readNextPeriod = true;
       res.wordRecognized = 'следующий';
+    } else if (text == 'номер') {
+      res.readObjNum = true;
+      res.wordRecognized = 'номеробъекта';
     }
 
     if (res.wordRecognized != '') {
@@ -361,6 +483,11 @@ function analyzeText(text, res){
     currNumb = Number(text);
     if (isNaN(currNumb)) {
       currNumb = -1;
+    }
+
+    if (res.readObjNumber) {
+      res.objNum = text;
+      res.readObjNum = false;
     }
 
     if (res.readPeriodZa || res.readPeriodS || res.readPeriodPo || (currNumb = -1)) {
