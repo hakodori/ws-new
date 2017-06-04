@@ -20,6 +20,20 @@ app.get("/api/easyrp/:solution/:developer/:version/:easyRP_ID/:ph", function(req
     reqParams.developer = decodeURI(req.params.developer);
     reqParams.version = decodeURI(req.params.version);
     reqParams.easyRP_ID = decodeURI(req.params.easyRP_ID);
+
+    if (reqParams.solution = 'any') {
+      reqParams.solution = '';
+    }
+    if (reqParams.developer = 'any') {
+      reqParams.developer = '';
+    }
+    if (reqParams.version = 'any') {
+      reqParams.version = '';
+    }
+    if (reqParams.easyRP_ID = 'any') {
+      reqParams.easyRP_ID = '';
+    }
+
     // console.log(req.params.ph);
     str = str.toLowerCase();
 
@@ -152,7 +166,7 @@ function readByPhrase(splitArr, res, response, reqParams) {
                     res.arrParsed.push(res.wordRecognized);
         					} else {
         						res.arrParsed.push(wordCurr);
-                    if (currWord.length > 2) {
+                    if (wordCurr.length > 2) {
                       res.arrNotParsed.push(wordCurr);
                     }
         					}
@@ -268,18 +282,23 @@ function readByPhrase(splitArr, res, response, reqParams) {
             currArea = returnArea(res);
 
             if (res.obj == '' && currArea != '' && currType != '') {		//попробуем определить объект по таблице соответствий
-          		returnObjByAttribute(res, currType, currArea, defsEntire);
+          		res.obj = returnObjByAttribute(res, currType, currArea, defsEntire);
           	}
+
+            // console.log(res.obj);
+            // console.log(currType);
+            // console.log(res.phPlanFact);
+            // console.log(currArea);
 
             var defsFilter = defsEntire.filter(function(itemEntire) {
               return ((itemEntire.obj == res.obj)
-                && (itemEntire.objType == currType || itemEntire.objType == 'any')
-                && (itemEntire.pf == res.phPlanFact || itemEntire.pf == 'any')
-                && (itemEntire.area == currArea || itemEntire.objType == 'any')
-                && (itemEntire.solution == reqParams.solution || isEmpty(itemEntire.solution))
-                && (itemEntire.developer == reqParams.developer || isEmpty(itemEntire.developer))
-                && (itemEntire.version == reqParams.version || isEmpty(itemEntire.version))
-                && (itemEntire.easyRP_ID == reqParams.easyRP_ID || isEmpty(itemEntire.easyRP_ID))
+                 && (itemEntire.objType == currType || itemEntire.objType == 'any')
+                 && (itemEntire.pf == res.phPlanFact || itemEntire.pf == 'any')
+                 && (itemEntire.area == currArea || itemEntire.area == 'any')
+                 && (itemEntire.solution == reqParams.solution || isEmpty(itemEntire.solution))
+                 && (itemEntire.developer == reqParams.developer || isEmpty(itemEntire.developer))
+                 && (itemEntire.version == reqParams.version || isEmpty(itemEntire.version))
+                 && (itemEntire.easyRP_ID == reqParams.easyRP_ID || isEmpty(itemEntire.easyRP_ID))
               );
               //return (res.obj.localeCompare(itemEntire.obj) && currType.localeCompare(itemEntire.objType));
             });
@@ -299,7 +318,7 @@ function readByPhrase(splitArr, res, response, reqParams) {
                 );
               });
 
-              if (setsEntire.length > 0) {
+              if (setsFilter.length > 0) {
                 res.sets = setsFilter[0];
               }
 
@@ -338,7 +357,7 @@ function isEmpty(element) {
 function returnArea(res) {
 
     if (res.arrArea.length == 0) {
-      return undefined;
+      return 'неопределено';
     }
 
     res.arrArea.sort(function(a, b) {
@@ -347,12 +366,12 @@ function returnArea(res) {
 
     if (res.arrArea.length > 1) {
       if (res.arrArea[0].rate == res.arrArea[1].rate) {
-          return undefined;
+          return 'неопределено';
       } else {
-        return res.arrArea.area;
+        return res.arrArea[0].area;
       }
     } else {
-      return res.arrArea.area;
+      return res.arrArea[0].area;
     }
 
 }
@@ -394,12 +413,7 @@ function addTerm(term, res, vocEntire) {
 
     res.arrParsed.push(term.ethalon);
 
-    // console.log(term.object);
-    // console.log(term.area);
-    // console.log(term.analitics);
-    // console.log(term.index);
-
-    if ((term.object != null) && (term.object != undefined) && (term.object != '')) {
+    if ((term.obj_type != null) && (term.obj_type != undefined) && (term.obj_type != '')) {
         if (res.obj == '') {
           res.obj = currEthalon;
           res.objWeight = term.object * 1.1;
