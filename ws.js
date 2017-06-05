@@ -108,8 +108,8 @@ function readByPhrase(splitArr, res, response, reqParams) {
       	indVocFound = 0;
       	indPhraseBeg = 0;
       	indExactMatch = 0;
-      	wordsTermsQ = 20; // пока оставляем так, потом надо перебрать и взять Object.keys(JSON).length
-      	wordsVocQ = 1000;
+      	wordsTermsQ = 3; // пока оставляем так, потом надо перебрать и взять Object.keys(JSON).length
+      	//wordsVocQ = 1000;
       	WordsTermQ = 0;
 
         //console.log(vocs);
@@ -138,6 +138,8 @@ function readByPhrase(splitArr, res, response, reqParams) {
                 vocs.sort(function(a, b) {
                   return a.word0.localeCompare(b.word0);
                 });
+
+                wordsVocQ = vocs.length;
 
         				term = vocs[0];
                 // console.log(term);
@@ -177,7 +179,10 @@ function readByPhrase(splitArr, res, response, reqParams) {
       			indChanged = false;
       			while ((indCurr < numbWords) && (indPhraseVoc < wordsTermsQ)) {
       				wordCurr = splitArr[indCurr];
-      				currWordVoc = vocs[indVoc]['word' + indPhraseVoc];
+              // console.log(wordCurr);
+              // console.log(vocs[indVoc]);
+              // console.log(indVoc);
+              currWordVoc = vocs[indVoc]['word' + indPhraseVoc];
               //console.log(indPhraseVoc + ' ' + vocs[indVoc] + ' ' + indVoc + '---' + currWordVoc + '---' + indPhraseVoc);
 
       				searchInd = 0;
