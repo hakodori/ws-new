@@ -911,6 +911,36 @@ app.get("/api/voc", function(req, res){
     });
 });
 
+app.get("/api/def", function(req, res){
+
+    mongoClient.connect(url, function(err, db){
+        db.collection("def").find({}).toArray(function(err, users){
+
+            // users.sort(function(a, b) {
+            //   return a.word0.localeCompare(b.word0);
+            // });
+
+            res.send(users)
+            db.close();
+        });
+    });
+});
+
+app.get("/api/set", function(req, res){
+
+    mongoClient.connect(url, function(err, db){
+        db.collection("set").find({}).toArray(function(err, users){
+
+            // users.sort(function(a, b) {
+            //   return a.word0.localeCompare(b.word0);
+            // });
+
+            res.send(users)
+            db.close();
+        });
+    });
+});
+
 app.get("/api/voc/:id", function(req, res){
 
     var id = new objectId(req.params.id);
