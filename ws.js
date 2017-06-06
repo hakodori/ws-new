@@ -21,16 +21,16 @@ app.get("/api/easyrp/:solution/:developer/:version/:easyRP_ID/:ph", function(req
     reqParams.version = decodeURI(req.params.version);
     reqParams.easyRP_ID = decodeURI(req.params.easyRP_ID);
 
-    if (reqParams.solution = 'any') {
+    if (reqParams.solution == 'any') {
       reqParams.solution = '';
     }
-    if (reqParams.developer = 'any') {
+    if (reqParams.developer == 'any') {
       reqParams.developer = '';
     }
-    if (reqParams.version = 'any') {
+    if (reqParams.version == 'any') {
       reqParams.version = '';
     }
-    if (reqParams.easyRP_ID = 'any') {
+    if (reqParams.easyRP_ID == 'any') {
       reqParams.easyRP_ID = '';
     }
 
@@ -294,6 +294,7 @@ function readByPhrase(splitArr, res, response, reqParams) {
             // console.log(currType);
             // console.log(res.phPlanFact);
             // console.log(currArea);
+            // console.log(reqParams);
 
             var defsFilter = defsEntire.filter(function(itemEntire) {
               return ((itemEntire.obj == res.obj)
@@ -371,7 +372,9 @@ function returnArea(res) {
 
     if (res.arrArea.length > 1) {
       if (res.arrArea[0].rate == res.arrArea[1].rate) {
-          return 'неопределено';
+          //return 'неопределено';
+          //??????????????????
+        return res.arrArea[0].area;
       } else {
         return res.arrArea[0].area;
       }
@@ -432,10 +435,23 @@ function addTerm(term, res, vocEntire) {
     }
 
     if ((term.area != null) && (term.area != undefined) && (term.area != '')) {
-        area = {};
-        area.area = term.area;
-        area.rate = 1 + term.object * 0.1;
-        res.arrArea.push(area);
+
+        currIndex = -1;
+        for (var i = 0; i < res.arrArea.length; i++) {
+            if (res.arrArea[i].area == term.area) {
+              currIndex = i;
+              break;
+            }
+        }
+
+        if (currIndex != -1) {
+          res.arrArea[currIndex].rate = res.arrArea[currIndex].rate + 1 + term.object * 0.1;
+        } else {
+          area = {};
+          area.area = term.area;
+          area.rate = 1 + term.object * 0.1;
+          res.arrArea.push(area);
+        }
     }
 
     if ((term.analitics != null) && (term.analitics != undefined) && (term.analitics != ''))  {
