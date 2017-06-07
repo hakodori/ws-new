@@ -177,12 +177,22 @@ function readByPhrase(splitArr, res, response, reqParams) {
               }
       	} else {
       			indChanged = false;
+            // console.log(wordCurr);
+            // console.log(indCurr);
+            // console.log(numbWords);
+            // console.log(indPhraseVoc);
+            // console.log(wordsTermsQ);
+            // console.log(indVoc);
       			while ((indCurr < numbWords) && (indPhraseVoc < wordsTermsQ)) {
       				wordCurr = splitArr[indCurr];
+              // console.log('cycle');
               // console.log(wordCurr);
               // console.log(vocs[indVoc]);
               // console.log(indVoc);
               currWordVoc = vocs[indVoc]['word' + indPhraseVoc];
+              if (currWordVoc == undefined) {
+                currWordVoc = '';
+              }
               //console.log(indPhraseVoc + ' ' + vocs[indVoc] + ' ' + indVoc + '---' + currWordVoc + '---' + indPhraseVoc);
 
       				searchInd = 0;
@@ -197,7 +207,11 @@ function readByPhrase(splitArr, res, response, reqParams) {
 
       				indChanged = false;
 
-      	 			if ((currWordVoc != undefined) && (currWordVoc.localeCompare(wordCurr) == -1) && (inVoc)) {  	//сравнение слов
+              // console.log(currWordVoc);
+              // console.log(currWordVoc.localeCompare(wordCurr));
+              // console.log(inVoc);
+
+      	 			if (((currWordVoc == undefined) || (currWordVoc.localeCompare(wordCurr) == -1)) && (inVoc)) {  	//сравнение слов
       					indVoc++;
       					indChanged = true;
       					if (indVoc == wordsVocQ) {    //дошли до последнего слова словаря
@@ -265,6 +279,10 @@ function readByPhrase(splitArr, res, response, reqParams) {
             //console.log(defsEntire);
 
             //возвращаем вид объекта
+            // console.log(res.typeReport);
+            // console.log(res.typeObj);
+            // console.log(res.typeList);
+
             currType = '';
             if (res.typeReport > res.typeObj && res.typeReport > res.typeList) {
           		currType = "отчет";
@@ -294,7 +312,6 @@ function readByPhrase(splitArr, res, response, reqParams) {
             // console.log(currType);
             // console.log(res.phPlanFact);
             // console.log(currArea);
-            // console.log(reqParams);
 
             var defsFilter = defsEntire.filter(function(itemEntire) {
               return ((itemEntire.obj == res.obj)
@@ -421,7 +438,12 @@ function addTerm(term, res, vocEntire) {
 
     res.arrParsed.push(term.ethalon);
 
-    if ((term.obj_type != null) && (term.obj_type != undefined) && (term.obj_type != '')) {
+    // console.log(term.obj_type);
+    // console.log(res.obj);
+    // console.log(currEthalon);
+
+    //if ((term.obj_type != null) && (term.obj_type != undefined) && (term.obj_type != '')) {
+    if (term.object > 0) {
         if (res.obj == '') {
           res.obj = currEthalon;
           res.objWeight = term.object * 1.1;

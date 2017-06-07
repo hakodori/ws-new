@@ -8,8 +8,8 @@
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
 </head>
 <body>
-    <h2>Easy RP</h2>
-    <form name="userForm">
+    <h2>Easy RP Sets</h2>
+    <!-- <form name="userForm">
         <input type="hidden" name="id" value="0" />
         <div class="form-group">
             <label for="name">Словарь:</label>
@@ -35,31 +35,24 @@
 
         </div>
 
-    </form>
-    <a href="defs.html">Defs</a>
-    <a href="sets.html">Sets</a>
+    </form> -->
     <table class="table table-condensed table-striped table-bordered">
-        <thead><tr><th>Id</th>
-          <th>phrase</th>
-          <th>ethalon</th>
-          <th>area</th>
-          <th>obj_type</th>
-          <th>flag</th>
-          <th>filter</th>
-          <th>period</th>
-          <th>analitics</th>
-          <th>index</th>
-          <th>sort</th>
-          <th>action</th>
-          <th>require_attr</th>
-          <th>report</th>
-          <th>list</th>
-          <th>object</th>
-          <th>word0</th>
-          <th>word1</th>
-          <th>word2</th>
-          <th>word3</th>
-          <th>word4</th>
+        <thead><tr>
+          <!-- <th>Id</th> -->
+          <th>Solution</th>
+          <th>Developer</th>
+          <th>Version</th>
+          <th>EasyRP_ID</th>
+          <th>obj</th>
+          <th>sortMoney</th>
+          <th>sortMoneyPath</th>
+          <th>sortPeriod</th>
+          <th>sortPeriodPath</th>
+          <th>executor</th>
+          <th>executorPath</th>
+          <th>docPath</th>
+          <th>storage</th>
+          <th>storagePath</th>
           <th></th></tr></thead>
         <tbody>
         </tbody>
@@ -80,9 +73,9 @@
         }
 
         // Получение всех эдементов словаря
-        function GetVocs() {
+        function GetSets() {
             $.ajax({
-                url: "/api/voc",
+                url: "/api/set",
                 type: "GET",
                 contentType: "application/json",
                 success: function (users) {
@@ -201,22 +194,14 @@
         }
         // создание строки для таблицы
         var row = function (user) {
-            return "<tr data-rowid='" + user._id + "'><td>" + user._id + "</td>" +
-                   "<td>" + user.phrase + "</td>" + "<td>" + user.ethalon + "</td>" +
-                   "<td>" + user.area + "</td>" + "<td>" + user.obj_type + "</td>" +
-                   "<td>" + user.flag + "</td>" + "<td>" + user.filter + "</td>" +
-                   "<td>" + user.period + "</td>" + "<td>" + user.analitics + "</td>" +
-                   "<td>" + user.index + "</td>" + "<td>" + user.sort + "</td>" +
-                   "<td>" + user.action + "</td>" + "<td>" + user.require_attr + "</td>" +
-                   "<td>" + user.report + "</td>" + "<td>" + user.list + "</td>" +
-                   "<td>" + user.object + "</td>"+
-                   "<td>" + user.word0 + "</td>"+
-                   "<td>" + user.word1 + "</td>"+
-                   "<td>" + user.word2 + "</td>"+
-                   "<td>" + user.word3 + "</td>"+
-                   "<td>" + user.word4 + "</td>"+
-                   "<td><a class='editLink' data-id='" + user._id + "'>Изменить</a> | " +
-                    "<a class='removeLink' data-id='" + user._id + "'>Удалить</a></td></tr>";
+            //return "<tr data-rowid='" + user._id + "'><td>" + user._id + "</td>" +
+            return       "<tr><td>" + user.Solution + "</td>" + "<td>" + user.Developer + "</td>" +
+                   "<td>" + user.Version + "</td>" + "<td>" + user.EasyRP_ID + "</td>" +
+                   "<td>" + user.obj + "</td>" + "<td>" + user.sortMoney + "</td>" +
+                   "<td>" + user.sortMoneyPath + "</td>" + "<td>" + user.sortPeriod + "</td>" +
+                   "<td>" + user.sortPeriodPath + "</td>" + "<td>" + user.executor + "</td>" +
+                   "<td>" + user.executorPath + "</td>" + "<td>" + user.docPath + "</td>" +
+                   "<td>" + user.storage + "</td>" + "<td>" + user.storagePath + "</td></tr>";
         }
         // сброс значений формы
         $("#reset").click(function (e) {
@@ -269,7 +254,7 @@
         })
 
         // загрузка пользователей
-        GetVocs();
+        GetSets();
     </script>
 </body>
 </html>
