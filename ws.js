@@ -200,18 +200,21 @@ function readByPhrase(splitArr, res, response, reqParams) {
       				while ((searchInd < indPhraseVoc) && (indChanged)) {
       					if (splitArr[indPhraseBeg + searchInd] != vocs[indVoc]['word' + searchInd]) {
       						inVoc = false;
-      						break;
+                  break;
       					}
       					searchInd++;
       				}
 
       				indChanged = false;
 
+              // console.log(indCurr);
               // console.log(currWordVoc);
+              // console.log(wordCurr);
               // console.log(currWordVoc.localeCompare(wordCurr));
               // console.log(inVoc);
+              // console.log(indExactMatch);
 
-      	 			if (((currWordVoc == undefined) || (currWordVoc.localeCompare(wordCurr) == -1)) && (inVoc)) {  	//сравнение слов
+      	 			if ((currWordVoc.localeCompare(wordCurr) == -1) && (inVoc)) {  	//сравнение слов
       					indVoc++;
       					indChanged = true;
       					if (indVoc == wordsVocQ) {    //дошли до последнего слова словаря
@@ -228,17 +231,21 @@ function readByPhrase(splitArr, res, response, reqParams) {
       							indPhraseVoc = 0;
       							indCurr = indPhraseBeg + 1;
       						}
+                  break;
                 }
-
-      					break;
 
       	 			} else if (currWordVoc == wordCurr) {
       					strFound = strFound + " " + wordCurr;
       					indPhraseVoc++;
       					indCurr++;
+                // console.log(indPhraseVoc);
+                // console.log(wordsTermsQ);
+                // console.log(indCurr);
+                // console.log(numbWords);
+                // console.log(vocs[indVoc]['word' + indPhraseVoc]);
       					if ((indPhraseVoc == wordsTermsQ)  	//дошли до конца термина (достигли максимальной длины терминов)
-      							|| (indCurr = numbWords)) {		//дошли до конца фразы
-      						addTerm(vocs[indVoc], res, vocEntire);
+      							|| (indCurr == numbWords)) {		//дошли до конца фразы
+                  addTerm(vocs[indVoc], res, vocEntire);
       						strFound = '';
       						indPhraseVoc = 0;
       						break;
@@ -248,6 +255,7 @@ function readByPhrase(splitArr, res, response, reqParams) {
       						WordsTermQ = indPhraseVoc;
       					}
       	 			} else {
+                // console.log(vocs[indExactMatch]);
                 if (indExactMatch >= 0) {
                   addTerm(vocs[indExactMatch], res, vocEntire);
       						strFound = '';
@@ -443,15 +451,15 @@ function addTerm(term, res, vocEntire) {
     // console.log(currEthalon);
 
     //if ((term.obj_type != null) && (term.obj_type != undefined) && (term.obj_type != '')) {
-    if (term.object > 0) {
+    if (term.obj_type > 0) {
         if (res.obj == '') {
           res.obj = currEthalon;
-          res.objWeight = term.object * 1.1;
+          res.objWeight = term.obj_type * 1.1;
         } else if (res.obj == 'продажи' && currEthalon == 'вп') {
           res.obj = 'вд';
-        } else if (term.object > res.objWeight) {
+        } else if (term.obj_type > res.objWeight) {
           res.obj = currEthalon;
-          res.objWeight = term.object;
+          res.objWeight = term.obj_type;
         }
         //res.arrIndex.push(term.index);
     }
@@ -467,11 +475,11 @@ function addTerm(term, res, vocEntire) {
         }
 
         if (currIndex != -1) {
-          res.arrArea[currIndex].rate = res.arrArea[currIndex].rate + 1 + term.object * 0.1;
+          res.arrArea[currIndex].rate = res.arrArea[currIndex].rate + 1 + term.obj_type * 0.1;
         } else {
           area = {};
           area.area = term.area;
-          area.rate = 1 + term.object * 0.1;
+          area.rate = 1 + term.obj_type * 0.1;
           res.arrArea.push(area);
         }
     }
