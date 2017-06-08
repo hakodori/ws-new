@@ -299,7 +299,7 @@ function readByPhrase(splitArr, res, response, reqParams) {
           	} else if (res.typeList > res.typeObj && res.typeList > res.typeReport) {
           		currType = "список";
           	} else {
-          		currType = undefined;
+          		currType = 'undefined';
           	}
 
             if (res.phPlan > res.phFact) {
@@ -307,7 +307,7 @@ function readByPhrase(splitArr, res, response, reqParams) {
             } else if (res.phPlan < res.phFact) {
               res.phPlanFact = 'fact';
             } else {
-              res.phPlanFact = undefined;
+              res.phPlanFact = 'undefined';
             }
 
             currArea = returnArea(res);
@@ -316,10 +316,10 @@ function readByPhrase(splitArr, res, response, reqParams) {
           		res.obj = returnObjByAttribute(res, currType, currArea, defsEntire);
           	}
 
-            // console.log(res.obj);
-            // console.log(currType);
-            // console.log(res.phPlanFact);
-            // console.log(currArea);
+            console.log(res.obj);
+            console.log(currType);
+            console.log(res.phPlanFact);
+            console.log(currArea);
 
             var defsFilter = defsEntire.filter(function(itemEntire) {
               return ((itemEntire.obj == res.obj)
@@ -368,13 +368,20 @@ function returnObjByAttribute(res, currType, currArea, defsEntire) {
   var defsFilter = defsEntire.filter(function(itemEntire) {
     return (itemEntire.area == currArea && itemEntire.objType == currType);
   });
+  // console.log(currArea);
+  // console.log(currType);
+  // console.log(defsFilter);
 
-  defsFilter.forEach(function(item, i, defsFilter) {
-    //console.log(item);
+  objectFound = '';
+  for (var i = 0; i < defsFilter.length; i++) {
+    item = defsFilter[i];
     if (item.result != null && item.result != undefined && item.result != '' && item.result != 0) {
-        return item.result
+        return item.result;
     }
-  });
+  }
+
+  return objectFound;
+
 }
 
 function isEmpty(element) {
@@ -388,7 +395,7 @@ function isEmpty(element) {
 function returnArea(res) {
 
     if (res.arrArea.length == 0) {
-      return 'неопределено';
+      return 'undefined';
     }
 
     res.arrArea.sort(function(a, b) {
@@ -397,9 +404,8 @@ function returnArea(res) {
 
     if (res.arrArea.length > 1) {
       if (res.arrArea[0].rate == res.arrArea[1].rate) {
-          //return 'неопределено';
-          //??????????????????
-        return res.arrArea[0].area;
+          return 'undefined';
+        //return res.arrArea[0].area;
       } else {
         return res.arrArea[0].area;
       }
@@ -411,7 +417,9 @@ function returnArea(res) {
 
 function addTerm(term, res, vocEntire) {
 
-    currEthalon = term.ethalon;
+    var currEthalon;
+
+     currEthalon = term.ethalon;
 
     while (currEthalon.substr(0, 6) == '[term~') {
         indexEndTerm = currEthalon.indexOf(']');
@@ -425,7 +433,7 @@ function addTerm(term, res, vocEntire) {
           addTerm(vocCurrTerm[0], res, vocEntire);
         }
 
-        currEthalon = currEthalon.substr(indexEndTerm + 1);
+        currEthalon = currEthalon.substr(indexEndTerm + 2);
     }
 
     res.readPeriodPo = false;
@@ -505,9 +513,9 @@ function addTerm(term, res, vocEntire) {
       res.filterOwn = true;
     }
 
-    if (term.ethelon == 'план') {
+    if (term.ethalon == 'план') {
       res.phPlan++;
-    } else if (term.ethelon == 'факт') {
+    } else if (term.ethalon == 'факт') {
       res.phFact++;
     }
 
