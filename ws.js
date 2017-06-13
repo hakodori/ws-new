@@ -321,21 +321,85 @@ function readByPhrase(splitArr, res, response, reqParams) {
             console.log(res.phPlanFact);
             console.log(currArea);
 
-            var defsFilter = defsEntire.filter(function(itemEntire) {
-              return ((itemEntire.obj == res.obj)
-                 && (itemEntire.objType == currType || itemEntire.objType == 'any')
-                 && (itemEntire.pf == res.phPlanFact || itemEntire.pf == 'any')
-                 && (itemEntire.area == currArea || itemEntire.area == 'any')
-                 && (itemEntire.solution == reqParams.solution || isEmpty(itemEntire.solution))
-                 && (itemEntire.developer == reqParams.developer || isEmpty(itemEntire.developer))
-                 && (itemEntire.version == reqParams.version || isEmpty(itemEntire.version))
-                 && (itemEntire.easyRP_ID == reqParams.easyRP_ID || isEmpty(itemEntire.easyRP_ID))
-              );
-              //return (res.obj.localeCompare(itemEntire.obj) && currType.localeCompare(itemEntire.objType));
-            });
+            // var defsFilter = defsEntire.filter(function(itemEntire) {
+            //   return ((itemEntire.obj == res.obj)
+            //      && (itemEntire.objType == currType || itemEntire.objType == 'any')
+            //      && (itemEntire.pf == res.phPlanFact || itemEntire.pf == 'any')
+            //      && (itemEntire.area == currArea || itemEntire.area == 'any')
+            //      && (itemEntire.solution == reqParams.solution || isEmpty(itemEntire.solution))
+            //      && (itemEntire.developer == reqParams.developer || isEmpty(itemEntire.developer))
+            //      && (itemEntire.version == reqParams.version || isEmpty(itemEntire.version))
+            //      && (itemEntire.easyRP_ID == reqParams.easyRP_ID || isEmpty(itemEntire.easyRP_ID))
+            //   );
+            //   //return (res.obj.localeCompare(itemEntire.obj) && currType.localeCompare(itemEntire.objType));
+            // });
+            bestRating = 0;
+            foundDefs = undefined
 
-            if (defsFilter.length > 0) {
-              res.defs = defsFilter[0];
+            for (var i = 0; i < defsEntire.length; i++) {
+              itemEntire = defsEntire[i];
+
+              if (itemEntire.obj != res.obj) {
+                continue;
+              }
+
+              currRating = 0;
+
+              if (itemEntire.objType == currType) {
+                currRating++;
+              } else if (itemEntire.objType != 'any') {
+                continue;
+              }
+
+              if (itemEntire.pf == res.phPlanFact) {
+                currRating++;
+              } else if (itemEntire.pf != 'any') {
+                continue;
+              }
+
+              if (itemEntire.area == currArea) {
+                currRating++;
+              } else if (itemEntire.area != 'any') {
+                continue;
+              }
+
+              if (itemEntire.solution == reqParams.solution) {
+                currRating++;
+              } else if (!isEmpty(itemEntire.solution)) {
+                continue;
+              }
+
+              if (itemEntire.developer == reqParams.developer) {
+                currRating++;
+              } else if (!isEmpty(itemEntire.developer)) {
+                continue;
+              }
+
+              if (itemEntire.version == reqParams.version) {
+                currRating++;
+              } else if (!isEmpty(itemEntire.version)) {
+                continue;
+              }
+
+              if (itemEntire.easyRP_ID == reqParams.easyRP_ID) {
+                currRating++;
+              } else if (!isEmpty(itemEntire.easyRP_ID)) {
+                continue;
+              }
+
+              if (currRating > bestRating) {
+          			bestRating = currRating;
+          			foundDefs = itemEntire;
+          		}
+
+            }
+
+            // if (defsFilter.length > 0) {
+            //   res.defs = defsFilter[0];
+            // }
+
+            if (foundDefs != undefined) {
+              res.defs = foundDefs;
             }
 
             db.collection("set").find({}).toArray(function(err, setsEntire){
