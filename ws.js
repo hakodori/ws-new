@@ -321,6 +321,9 @@ function readByPhrase(splitArr, res, response, reqParams) {
             console.log(res.phPlanFact);
             console.log(currArea);
 
+            res.area = currArea;
+            res.type = currType;
+
             // var defsFilter = defsEntire.filter(function(itemEntire) {
             //   return ((itemEntire.obj == res.obj)
             //      && (itemEntire.objType == currType || itemEntire.objType == 'any')
@@ -400,12 +403,12 @@ function readByPhrase(splitArr, res, response, reqParams) {
 
             if (foundDefs != undefined) {
               res.defs = foundDefs;
-            }
+              defsResult = foundDefs.result.toLowerCase();
 
             db.collection("set").find({}).toArray(function(err, setsEntire){
 
               var setsFilter = setsEntire.filter(function(itemEntire) {
-                return ((itemEntire.obj == res.obj)
+                return ((itemEntire.obj.toLowerCase() == defsResult)
                   && (itemEntire.solution == reqParams.solution || isEmpty(itemEntire.solution))
                   && (itemEntire.developer == reqParams.developer || isEmpty(itemEntire.developer))
                   && (itemEntire.version == reqParams.version || isEmpty(itemEntire.version))
@@ -420,6 +423,10 @@ function readByPhrase(splitArr, res, response, reqParams) {
               response.set({'Content-Type': 'text/html; charset=utf-8'});
               response.send(JSON.stringify(res));
             });
+          } else {
+            response.set({'Content-Type': 'text/html; charset=utf-8'});
+            response.send(JSON.stringify(res));
+          }
       });
   //         res.send(users)
     });
