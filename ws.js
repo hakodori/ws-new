@@ -590,7 +590,7 @@ function addTerm(term, res, vocEntire) {
     // console.log(term);
     // console.log(term.index);
     if ((term.index != null) && (term.index != undefined) && (term.index != ''))  {
-        res.arrIndex.push(term.index);
+        res.arrIndex.push(term.ethalon);
     }
 
     if ((term.sort != null) && (term.sort != undefined) && (term.sort != ''))  {
@@ -650,7 +650,7 @@ function analyzeText(text, res){
       currNumb = -1;
     }
 
-    if (res.readObjNumber) {
+    if (res.readObjNum) {
       res.objNum = text;
       res.readObjNum = false;
     }
