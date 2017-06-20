@@ -616,8 +616,10 @@ function addTerm(term, res, vocEntire) {
         res.arrIndex.push(term.ethalon);
     }
 
-    if ((term.sort != null) && (term.sort != undefined) && (term.sort != ''))  {
-        if (term.sort == 'убывание') {
+    console.log(term.sort);
+
+    if ((term.sort != null) && (term.sort != undefined) && (term.sort != '') && (term.sort > 0))  {
+        if (currEthalon == 'убывание') {
           res.sortType = 'DESC';
         } else {
           res.sortType = 'ASC';
