@@ -63,6 +63,9 @@ function parseString(str, res, response, reqParams){
     res.typeObj = 0;
     res.obj = '';
     res.arrArea = [];
+    res.arrIndex = [];
+    res.defsIndex = [];
+    res.defsAn = [];
     res.defs = [];
     res.sets = [];
     res.readObjNum = false;
@@ -419,6 +422,26 @@ function readByPhrase(splitArr, res, response, reqParams) {
             //   res.defs = defsFilter[0];
             // }
 
+            for (var i = 0; i < res.arrIndex.length; i++) {
+              itemIndex = res.arrIndex[i];
+              for (var j = 0; j < defsEntire.length; j++) {
+                itemDefs = defsEntire[j];
+                if ((itemDefs.obj == itemIndex) && (itemDefs.objType == 'показатель')) {
+                  res.defsIndex.push(itemDefs.result);
+                }
+              }
+            }
+
+            for (var i = 0; i < res.arrAn.length; i++) {
+              itemAn = res.arrAn[i];
+              for (var j = 0; j < defsEntire.length; j++) {
+                itemDefs = defsEntire[j];
+                if ((itemDefs.obj == itemAn) && (itemDefs.objType == 'аналитика')) {
+                  res.defsAn.push(itemDefs.result);
+                }
+              }
+            }
+
             if (foundDefs != undefined) {
               res.defs = foundDefs;
               defsResult = foundDefs.result.toLowerCase();
@@ -583,7 +606,7 @@ function addTerm(term, res, vocEntire) {
     }
 
     if ((term.analitics != null) && (term.analitics != undefined) && (term.analitics != ''))  {
-        res.arrAn.push(term.analitics);
+        res.arrAn.push(term.ethalon);
         res.analytics = res.analytics + term.ethalon + ' ';
     }
 
