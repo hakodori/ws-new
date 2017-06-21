@@ -529,7 +529,6 @@ function returnArea(res) {
 
 function addTerm(term, res, vocEntire) {
 
-    //console.log(term);
     var currEthalon;
 
      currEthalon = term.ethalon;
@@ -547,6 +546,7 @@ function addTerm(term, res, vocEntire) {
         }
 
         currEthalon = currEthalon.substr(indexEndTerm + 2);
+        currEthalon = currEthalon.trim();
     }
 
     res.readPeriodPo = false;
@@ -566,10 +566,6 @@ function addTerm(term, res, vocEntire) {
     }
 
     res.arrParsed.push(term.ethalon);
-
-    // console.log(term.obj_type);
-    // console.log(res.obj);
-    // console.log(currEthalon);
 
     //if ((term.obj_type != null) && (term.obj_type != undefined) && (term.obj_type != '')) {
     if (term.obj_type > 0) {
@@ -610,13 +606,9 @@ function addTerm(term, res, vocEntire) {
         res.analytics = res.analytics + term.ethalon + ' ';
     }
 
-    // console.log(term);
-    // console.log(term.index);
     if ((term.index != null) && (term.index != undefined) && (term.index != ''))  {
         res.arrIndex.push(term.ethalon);
     }
-
-    console.log(term.sort);
 
     if ((term.sort != null) && (term.sort != undefined) && (term.sort != '') && (term.sort > 0))  {
         if (currEthalon == 'убывание') {
