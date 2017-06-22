@@ -10,7 +10,7 @@ var url = "mongodb://sa:123321@ds055875.mlab.com:55875/easyrp";
 
 app.use(express.static(__dirname + "/public"));
 
-app.get("/api/easyrp/:solution/:developer/:version/:easyRP_ID/:ph", function(req, response){
+app.get("/api/easyrp/:solution/:developer/:version/:easyRP_ID/:learn/:ph", function(req, response){
 
     //console.log(req.params);
     str = decodeURI(req.params.ph);
@@ -20,6 +20,8 @@ app.get("/api/easyrp/:solution/:developer/:version/:easyRP_ID/:ph", function(req
     reqParams.developer = decodeURI(req.params.developer);
     reqParams.version = decodeURI(req.params.version);
     reqParams.easyRP_ID = decodeURI(req.params.easyRP_ID);
+    reqParams.learn = decodeURI(req.params.learn);
+    reqParams.ph = decodeURI(req.params.ph);
 
     if (reqParams.solution == 'any') {
       reqParams.solution = '';
@@ -303,6 +305,13 @@ function readByPhrase(splitArr, res, response, reqParams) {
 
       }
 
+      if (reqParams.learn == '1') {
+        db.collection("log").insert({phrase: reqParams.ph});
+        if (res.arrNotParsed.length > 0) {
+          db.collection("notParsed").insert({phrase: reqParams.ph});
+        }
+      }
+
       db.collection("def").find({}).toArray(function(err, defsEntire){
 
             //console.log(defsEntire);
@@ -446,7 +455,7 @@ function readByPhrase(splitArr, res, response, reqParams) {
               res.defs = foundDefs;
               defsResult = foundDefs.result.toLowerCase();
 
-            db.collection("set").find({}).toArray(function(err, setsEntire){
+              db.collection("set").find({}).toArray(function(err, setsEntire){
 
               var setsFilter = setsEntire.filter(function(itemEntire) {
                 return ((itemEntire.obj.toLowerCase() == defsResult)
@@ -465,8 +474,10 @@ function readByPhrase(splitArr, res, response, reqParams) {
               response.send(JSON.stringify(res));
             });
           } else {
+
             response.set({'Content-Type': 'text/html; charset=utf-8'});
             response.send(JSON.stringify(res));
+
           }
       });
   //         res.send(users)
