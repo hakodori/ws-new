@@ -739,7 +739,7 @@ function readPeriod(text, res, currNumb){
         }
 
         if (!res.readPeriodPo) {
-          res.monthS = res.month;
+          res.monthS = currMonth;
         }
 
         if ((res.readPeriodZa || res.readPeriodPo) && res.readPastPeriod) {
@@ -747,7 +747,7 @@ function readPeriod(text, res, currNumb){
         }
 
         if (!res.readPeriodS) {
-          res.monthPo = res.month;
+          res.monthPo = currMonth;
         }
 
         if (res.readPastPeriod) {
@@ -940,7 +940,8 @@ function readPeriod(text, res, currNumb){
         }
       } else if (text == 'вчера') {
 
-        tempDate = currDate.setDate(currDay - 1);
+        var tempDate = new Date();
+        tempDate.setDate(tempDate.getDate() - 1);
         if (res.readPeriodZa) {
 
           res.yearS = tempDate.getFullYear();
@@ -971,7 +972,8 @@ function readPeriod(text, res, currNumb){
         }
       } else if (text == 'завтра') {
 
-        tempDate = currDate.setDate(currDay + 1);
+        var tempDate = new Date();
+        tempDate.setDate(tempDate.getDate() + 1);
         if (res.readPeriodZa) {
 
           res.yearS = tempDate.getFullYear();
@@ -1016,7 +1018,7 @@ function readPeriod(text, res, currNumb){
 
           res.yearPo = currNumb;
           if (res.monthPo == 0) {
-            res.monthS = 12;
+            res.monthPo = 12;
           }
 
         } else {
@@ -1027,7 +1029,7 @@ function readPeriod(text, res, currNumb){
           }
           res.yearPo = currNumb;
           if (res.monthPo == 0) {
-            res.monthS = 12;
+            res.monthPo = 12;
           }
         }
 
