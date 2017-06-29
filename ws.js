@@ -367,7 +367,7 @@ function readByPhrase(splitArr, res, response, reqParams) {
             //   //return (res.obj.localeCompare(itemEntire.obj) && currType.localeCompare(itemEntire.objType));
             // });
             bestRating = 0;
-            foundDefs = undefined
+            foundDefs = undefined;
 
             for (var i = 0; i < defsEntire.length; i++) {
               itemEntire = defsEntire[i];
@@ -396,25 +396,25 @@ function readByPhrase(splitArr, res, response, reqParams) {
                 continue;
               }
 
-              if (itemEntire.solution == reqParams.solution) {
+              if (itemEntire.Solution == reqParams.solution) {
                 currRating++;
               } else if (!isEmpty(itemEntire.solution)) {
                 continue;
               }
 
-              if (itemEntire.developer == reqParams.developer) {
+              if (itemEntire.Developer == reqParams.developer) {
                 currRating++;
               } else if (!isEmpty(itemEntire.developer)) {
                 continue;
               }
 
-              if (itemEntire.version == reqParams.version) {
+              if (itemEntire.Version == reqParams.version) {
                 currRating++;
               } else if (!isEmpty(itemEntire.version)) {
                 continue;
               }
 
-              if (itemEntire.easyRP_ID == reqParams.easyRP_ID) {
+              if (itemEntire.EasyRP_ID == reqParams.easyRP_ID) {
                 currRating++;
               } else if (!isEmpty(itemEntire.easyRP_ID)) {
                 continue;
@@ -424,7 +424,6 @@ function readByPhrase(splitArr, res, response, reqParams) {
           			bestRating = currRating;
           			foundDefs = itemEntire;
           		}
-
             }
 
             // if (defsFilter.length > 0) {
@@ -683,7 +682,7 @@ function analyzeText(text, res){
       res.readObjNum = false;
     }
 
-    if (res.readPeriodZa || res.readPeriodS || res.readPeriodPo || (currNumb = -1)) {
+    if (res.readPeriodZa || res.readPeriodS || res.readPeriodPo || (currNumb != -1)) {
       readPeriod(text, res, currNumb);
       if (res.periodRead) {
         res.wordRecognized = 'период';
