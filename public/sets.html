@@ -39,10 +39,10 @@
     <table class="table table-condensed table-striped table-bordered">
         <thead><tr>
           <!-- <th>Id</th> -->
-          <th>Solution</th>
-          <th>Developer</th>
-          <th>Version</th>
-          <th>EasyRP_ID</th>
+          <th>solution</th>
+          <th>developer</th>
+          <th>version</th>
+          <th>easyRP_ID</th>
           <th>obj</th>
           <th>sortMoney</th>
           <th>sortPathMoney</th>
@@ -53,6 +53,7 @@
           <th>pathDoc</th>
           <th>storage</th>
           <th>pathStorage</th>
+          <th>defaultIndicatiors</th>
           <th></th></tr></thead>
         <tbody>
         </tbody>
@@ -195,13 +196,13 @@
         // создание строки для таблицы
         var row = function (user) {
             //return "<tr data-rowid='" + user._id + "'><td>" + user._id + "</td>" +
-            return       "<tr><td>" + user.Solution + "</td>" + "<td>" + user.Developer + "</td>" +
-                   "<td>" + user.Version + "</td>" + "<td>" + user.EasyRP_ID + "</td>" +
+            return       "<tr><td>" + user.solution + "</td>" + "<td>" + user.developer + "</td>" +
+                   "<td>" + user.version + "</td>" + "<td>" + user.easyRP_ID + "</td>" +
                    "<td>" + user.obj + "</td>" + "<td>" + user.sortMoney + "</td>" +
                    "<td>" + user.sortPathMoney + "</td>" + "<td>" + user.sortPeriod + "</td>" +
                    "<td>" + user.sortPathPeriod + "</td>" + "<td>" + user.executor + "</td>" +
                    "<td>" + user.pathExecutor + "</td>" + "<td>" + user.pathDoc + "</td>" +
-                   "<td>" + user.storage + "</td>" + "<td>" + user.pathStorage + "</td></tr>";
+                   "<td>" + user.storage + "</td>" + "<td>" + user.pathStorage + "</td>" + "<td>" + user.defaultIndicatior +  "</td>" + "</tr>";
         }
         // сброс значений формы
         $("#reset").click(function (e) {

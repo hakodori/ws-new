@@ -376,47 +376,57 @@ function readByPhrase(splitArr, res, response, reqParams) {
                 continue;
               }
 
+              // console.log(itemEntire);
               currRating = 0;
 
               if (itemEntire.objType == currType) {
                 currRating++;
               } else if (itemEntire.objType != 'any') {
+// console.log(1);
                 continue;
               }
 
               if (itemEntire.pf == res.phPlanFact) {
                 currRating++;
               } else if (itemEntire.pf != 'any') {
+// console.log(2);
                 continue;
               }
 
               if (itemEntire.area == currArea) {
                 currRating++;
               } else if (itemEntire.area != 'any') {
+// console.log(3);
                 continue;
               }
 
-              if (itemEntire.Solution == reqParams.solution) {
+              if (itemEntire.solution == reqParams.solution) {
                 currRating++;
               } else if (!isEmpty(itemEntire.solution)) {
+// console.log(4);
                 continue;
               }
 
-              if (itemEntire.Developer == reqParams.developer) {
+              if (itemEntire.developer == reqParams.developer) {
                 currRating++;
               } else if (!isEmpty(itemEntire.developer)) {
+// console.log(itemEntire.developer);
+// console.log(reqParams.developer);
+// console.log(5);
                 continue;
               }
 
-              if (itemEntire.Version == reqParams.version) {
+              if (itemEntire.version == reqParams.version) {
                 currRating++;
               } else if (!isEmpty(itemEntire.version)) {
+// console.log(6);
                 continue;
               }
 
-              if (itemEntire.EasyRP_ID == reqParams.easyRP_ID) {
+              if (itemEntire.easyRP_ID == reqParams.easyRP_ID) {
                 currRating++;
               } else if (!isEmpty(itemEntire.easyRP_ID)) {
+// console.log(7);
                 continue;
               }
 
@@ -425,6 +435,8 @@ function readByPhrase(splitArr, res, response, reqParams) {
           			foundDefs = itemEntire;
           		}
             }
+
+            // console.log(foundDefs);
 
             // if (defsFilter.length > 0) {
             //   res.defs = defsFilter[0];
