@@ -122,7 +122,7 @@ function readByPhrase(splitArr, res, response, reqParams) {
       	while (indCurr < numbWords) {
 
         wordCurr = splitArr[indCurr];
-        // console.log(wordCurr);
+        // console.log('tek slovo=-=-=-=-=-=-=- ' + wordCurr);
         // console.log(indPhraseVoc);
 
       	if (indPhraseVoc == 0) {
@@ -242,10 +242,17 @@ function readByPhrase(splitArr, res, response, reqParams) {
                     indCurr = indPhraseBeg + WordsTermQ;
                     // КОНЕЦ ЭКСПЕРИМЕНТА
       						} else {
-                    res.arrParsed.push(splitArr[indPhraseBeg]);
-                    if (splitArr[indPhraseBeg].length > 2) {
-                      res.arrNotParsed.push(splitArr[indPhraseBeg]);
+                    analyzeText(splitArr[indPhraseBeg], res);
+
+                    if (res.wordRecognized != '') {
+                      res.arrParsed.push(res.wordRecognized);
+          					} else {
+                      res.arrParsed.push(splitArr[indPhraseBeg]);
+                      if (splitArr[indPhraseBeg].length > 2) {
+                        res.arrNotParsed.push(splitArr[indPhraseBeg]);
+                      }
                     }
+
       							indPhraseVoc = 0;
       							indCurr = indPhraseBeg + 1;
       						}
@@ -733,13 +740,14 @@ function readPeriod(text, res, currNumb){
 
     if (isNotNum) {
       getMonthNum(res, text);
+
       if ((res.month > 0) && (res.month <= 12)) {
         if ((res.readPeriodZa || res.readPeriodS) && res.readPastPeriod) {
           res.yearS = currYear - 1;
         }
 
         if (!res.readPeriodPo) {
-          res.monthS = currMonth;
+          res.monthS = res.month;
         }
 
         if ((res.readPeriodZa || res.readPeriodPo) && res.readPastPeriod) {
@@ -747,7 +755,7 @@ function readPeriod(text, res, currNumb){
         }
 
         if (!res.readPeriodS) {
-          res.monthPo = currMonth;
+          res.monthPo = res.month;
         }
 
         if (res.readPastPeriod) {
