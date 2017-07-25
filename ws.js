@@ -707,6 +707,10 @@ function analyzeText(text, res){
         res.wordRecognized = 'период';
       }
     }
+
+    if (res.wordRecognized == '' && currNumb != -1) {
+      res.wordRecognized = currNumb;
+    }
 }
 
 function readPeriod(text, res, currNumb){
