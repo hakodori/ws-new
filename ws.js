@@ -349,7 +349,7 @@ function readByPhrase(splitArr, res, response, reqParams) {
 
             currArea = returnArea(res);
 
-            if (res.obj == '' && currArea != '' && currType != '') {		//попробуем определить объект по таблице соответствий
+            if (res.obj == '' && currArea != '' && currType != '' && currArea != 'undefined') {		//попробуем определить объект по таблице соответствий
           		res.obj = returnObjByAttribute(res, currType, currArea, defsEntire);
           	}
 
