@@ -78,6 +78,7 @@ function parseString(str, res, response, reqParams){
     res.phPlanFact = undefined;
     res.sortType = '';
     res.filterOwn = false;
+    res.phAction = '';
 
     // splitArr.forEach(function(item, i, splitArr) {
     //   //console.log(item);
@@ -660,7 +661,7 @@ function addTerm(term, res, vocEntire) {
     if (term.action > 0) {
       res.phAction = term.ethalon;
     }
- 
+
 }
 
 function analyzeText(text, res){
