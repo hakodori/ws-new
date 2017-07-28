@@ -657,6 +657,10 @@ function addTerm(term, res, vocEntire) {
       res.phFact++;
     }
 
+    if (term.action > 0) {
+      res.phAction = term.ethalon;
+    }
+ 
 }
 
 function analyzeText(text, res){
