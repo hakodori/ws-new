@@ -167,7 +167,7 @@ function readByPhrase(splitArr, res, response, reqParams) {
           					indPhraseBeg = indCurr;
           					WordsTermQ = 1;
           					indCurr++;
-                    if (indCurr == numbWords) {
+                    if (indCurr == numbWords && indExactMatch >= 0) {
                       addTerm(term, res, vocEntire);
           					}
         				} else {
