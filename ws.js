@@ -79,6 +79,7 @@ function parseString(str, res, response, reqParams){
     res.sortType = '';
     res.filterOwn = false;
     res.phAction = '';
+    res.arRequiredParam = [];
 
     // splitArr.forEach(function(item, i, splitArr) {
     //   //console.log(item);
@@ -487,6 +488,12 @@ function readByPhrase(splitArr, res, response, reqParams) {
 
               if (setsFilter.length > 0) {
                 res.sets = setsFilter[0];
+                for (var i = 0; i < res.arRequiredParam.length; i++) {
+                  itemReqParam = res.arRequiredParam[i];
+                  if (res.sets[itemReqParam] != undefined) {
+                    res.arRequiredParam[i] = res.sets[itemReqParam];
+                  }
+                }
               }
 
               response.set({'Content-Type': 'text/html; charset=utf-8'});
@@ -577,6 +584,20 @@ function addTerm(term, res, vocEntire) {
 
         currEthalon = currEthalon.substr(indexEndTerm + 2);
         currEthalon = currEthalon.trim();
+    }
+
+    currPosExpect = currEthalon.indexOf('[expect~') + 1;
+    while (currPosExpect > 0) {
+      strExpect = currEthalon.substr(currPosExpect - 1);
+      strExpect.trim();
+      posEndTerm = currEthalon.indexOf(']');
+
+      currTerm = strExpect.substr(8, posEndTerm - 8);
+
+      res.arRequiredParam.push(currTerm);
+
+      currEthalon = currEthalon.replace(new RegExp('[expect~' + currTerm + ']','g'), "");
+      currPosExpect = currEthalon.indexOf('[expect~') + 1;
     }
 
     res.readPeriodPo = false;
