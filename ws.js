@@ -425,7 +425,7 @@ function readByPhrase(splitArr, res, response, reqParams) {
                 continue;
               }
 
-              if (itemEntire.version == reqParams.version) {
+              if (isVersionOK(itemEntire.version, reqParams.version)) {
                 currRating++;
               } else if (!isEmpty(itemEntire.version)) {
 // console.log(6);
@@ -481,7 +481,8 @@ function readByPhrase(splitArr, res, response, reqParams) {
                 return ((itemEntire.obj.toLowerCase() == defsResult)
                   && (itemEntire.solution == reqParams.solution || isEmpty(itemEntire.solution))
                   && (itemEntire.developer == reqParams.developer || isEmpty(itemEntire.developer))
-                  && (itemEntire.version == reqParams.version || isEmpty(itemEntire.version))
+                  //&& (itemEntire.version == reqParams.version || isEmpty(itemEntire.version))
+                  && (isVersionOK(itemEntire.version, reqParams.version))
                   && (itemEntire.easyRP_ID == reqParams.easyRP_ID || isEmpty(itemEntire.easyRP_ID))
                 );
               });
@@ -530,6 +531,37 @@ function returnObjByAttribute(res, currType, currArea, defsEntire) {
   }
 
   return objectFound;
+
+}
+
+function isVersionOK(defsVer, paramVer) {
+
+  posPoint = defsVer.indexOf('.');
+  if (posPoint > -1) {
+    strX = defsVer.substr(posPoint + 1);
+    strX.trim()
+
+    if (strX == 'x') {
+      posPoint = paramVer.indexOf('.');
+      if (posPoint > -1) {
+        strVerNum = paramVer.substr(posPoint + 1);
+        strVerNum.trim()
+
+        defsToCompare = defsVer.replace(new RegExp('x','g'), strVerNum);
+
+        return (defsToCompare == paramVer);
+
+      } else return false;
+
+    } else {
+
+      return (defsVer == paramVer);
+    }
+  } else {
+    return false;
+  }
+
+  return false;
 
 }
 
